@@ -4,9 +4,9 @@
  */
 
 use Symfony\Component\Console\Application;
-use Birke\Mediawiki\Bookbot\UpdateCommand;
-use Birke\Mediawiki\Bookbot\CleanHeadlinesCommand;
-use Birke\Mediawiki\Bookbot\CleanUpdateCommand;
+use Birke\Mediawiki\Bookbot\Command\UpdateCommand;
+use Birke\Mediawiki\Bookbot\Command\CleanHeadlinesCommand;
+use Birke\Mediawiki\Bookbot\Command\CleanUpdateCommand;
 
 require_once 'vendor/autoload.php';
 
