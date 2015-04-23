@@ -15,7 +15,8 @@ use \Monolog\Logger;
  *
  * @author birkeg
  */
-class TocGenerator {
+class TocGenerator
+{
     
     /**
      *
@@ -29,12 +30,14 @@ class TocGenerator {
      */
     protected $logger;
     
-    function __construct(ApiConnector $conn, Logger $logger) {
+    public function __construct(ApiConnector $conn, Logger $logger)
+    {
         $this->conn = $conn;
         $this->logger = $logger;
     }
 
-    public function generateTocForTitle($title) {
+    public function generateTocForTitle($title)
+    {
         // Download page text
         $text = $this->conn->downloadPageText($title);
         $tocData = new TocText($text);
@@ -57,83 +60,20 @@ class TocGenerator {
         // Edit page - replace TOC div contents with contents of new list, if new toc is different
         if (!$tocData->tocHasChanged($toctext)) {
             $this->logger->info("TOC for page '$title' has not changed.");
-			return;
+            return;
         }
         $this->conn->editPage($title, $tocData->getNewTocPage($toctext), 'Updated book table of contents');
     }
     
-    public function generatePrintpageForTitle($title, $preamble="none", $printpageName="_Druckversion") {
-        $printTitle = $title.'/'.$printpageName;
-                
-        // Download page text
-        $text = $this->conn->downloadPageText($title);
-        $tocData = new TocText($text);
-        if (!$tocData->tocExists()) {
-            $this->logger->notice("Page '$title' has no TOC.");
-            return;
-        }
-        
-        $oldPrintText = $this->conn->downloadPageText($printTitle);
-        // exclude from toc
-        // see  Bookmaker::renderxh1
-        $printText = "<xh1> $title </xh1>";
-        if ($preamble !== "none"){
-        	$printText .= "<div class=\"preamble print-only\">$preamble</div>\n";
-        }
-        $printText .= "__TOC__\n";
-        
-        
-        foreach($tocData->getTitlesAndLevels() as $pagedata) {
-        	
-        	/* don't go through tocs from sections here */
-            if (strpos($pagedata['full_title'], "#") !== false){
-            	//$this->logger->info("No anchor");
-            	continue;
-            }
-            $cnt = $pagedata['level'];
-        	$indent = \str_repeat("=", $cnt);
-        	$titleText = $pagedata['title'];
-        	$booktitlePrefix = "$this->booktitle/";
-        	if (strpos($titleText, $booktitlePrefix) === 0){
-        		$titleText = substr($titleText, strlen($booktitlePrefix));
-        	}
-        	$title = "\n$indent " .$titleText ." $indent\n" ;
-        	$printText .= $title;
-        	
-        	
-        	$fullPage = $this->conn->downloadPageText($pagedata['title']);
-        	$this->logger->info("DOWNLOAD " . $pagedata['title']);
-        	
-        	//@todo nice regex
-        	$fullPage = str_replace('== Einzelnachweise ==','',  $fullPage, $count);
-        	$fullPage = str_replace('= Einzelnachweise =','',  $fullPage, $count);
-        	$fullPage = str_replace('<references \>','',  $fullPage, $count);
-        	
-           	$printText .= $fullPage;
-        	$this->logger->info("len all " . strlen($printText));
-
-     
-        }
-        $printText .= "\n== Einzelnachweise ==\n" ;
-        $printText .='<references />';
-        $this->logger->info("Created new print version.", array('printtext' => $printText));
-        // Edit page - replace TOC div contents with contents of new list, if new toc is different
-        if ($oldPrintText === $printText) {
-            $this->logger->info("Print version for page '$title' has not changes.");
-            return;
-        }
-        
-        $this->editPage($printTitle, $printText, 'Updated print version after TOC change');
-    }
-    
-    protected function getTocFromTitles(TocText $tocData) {
+    protected function getTocFromTitles(TocText $tocData)
+    {
         $titles = $tocData->getTitlesAndLevels();
         $toc = array();
         foreach ($titles as $pagedata) {
-	        $this->logger->info("LABElTitelLevel", $pagedata);
-	        /* don't go through tocs from sections here again*/
-            if (strpos($pagedata['full_title'], "#") !== false){
-            	continue;
+            $this->logger->info("LABElTitelLevel", $pagedata);
+            /* don't go through tocs from sections here again*/
+            if (strpos($pagedata['full_title'], "#") !== false) {
+                continue;
             }
             $toc[] = array(
                 'title' => $pagedata['label'],
@@ -155,14 +95,13 @@ class TocGenerator {
         return $toc;
     }
     
-    protected function editPage($title, $content, $summary) {
+    protected function editPage($title, $content, $summary)
+    {
         $result = $this->conn->editPage($title, $content, $summary);
         if ($result == 'Success') {
             $this->logger->info("Page '$title' was updated.");
-        }
-        else {
+        } else {
             $this->logger->warn("Update for page '$title' failed.");
         }
     }
-    
 }
