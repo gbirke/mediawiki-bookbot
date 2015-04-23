@@ -9,7 +9,7 @@ class TocTextTest extends PHPUnit_Framework_TestCase {
     protected $text;
     
     public function setUp() {
-        $this->text = new Birke\Mediawiki\Bookbot\TocText(file_get_contents(__DIR__ . '/test_text.txt'));
+        $this->text = new Birke\Mediawiki\Bookbot\TocText(file_get_contents(__DIR__ . '/fixtures/test_text.txt'));
     } 
     
     public function testGetTocTextHasCorrectOffset() {
@@ -41,11 +41,11 @@ class TocTextTest extends PHPUnit_Framework_TestCase {
     }
     
     public function testTocHasChangedWhenTocIsIdentical() {
-        $this->assertFalse($this->text->tocHasChanged(file_get_contents(__DIR__ . '/new_toc_1.txt')));
+        $this->assertFalse($this->text->tocHasChanged(file_get_contents(__DIR__ . '/fixtures/new_toc_1.txt')));
     }
     
     public function testTocHasChangedWhenTocIsDifferent() {
-        $this->assertTrue($this->text->tocHasChanged(file_get_contents(__DIR__ . '/new_toc_2.txt')));
+        $this->assertTrue($this->text->tocHasChanged(file_get_contents(__DIR__ . '/fixtures/new_toc_2.txt')));
     }
     
     
