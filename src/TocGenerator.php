@@ -6,7 +6,7 @@
  * @author birkeg
  */
 
-namespace Birke\Mediawiki\Tocbot;
+namespace Birke\Mediawiki\Bookbot;
 
 use \Monolog\Logger;
 

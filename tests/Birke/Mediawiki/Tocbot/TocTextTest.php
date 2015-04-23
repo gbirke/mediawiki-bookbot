@@ -4,12 +4,12 @@ class TocTextTest extends PHPUnit_Framework_TestCase {
     
     /**
      *
-     * @var Birke\Mediawiki\Tocbot\TocText
+     * @var Birke\Mediawiki\Bookbot\TocText
      */
     protected $text;
     
     public function setUp() {
-        $this->text = new Birke\Mediawiki\Tocbot\TocText(file_get_contents(__DIR__ . '/test_text.txt'));
+        $this->text = new Birke\Mediawiki\Bookbot\TocText(file_get_contents(__DIR__ . '/test_text.txt'));
     } 
     
     public function testGetTocTextHasCorrectOffset() {

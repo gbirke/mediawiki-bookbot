@@ -14,7 +14,7 @@
 class TocLevelCalcTest extends PHPUnit_Framework_TestCase {
     
     protected function getNewLevels($levels, $parentLevel) {
-        $calc = new Birke\Mediawiki\Tocbot\TocLevelCalc();
+        $calc = new Birke\Mediawiki\Bookbot\TocLevelCalc();
         $newLevels = array();
         foreach($levels as $l) {
             $newLevels[] = $calc->getNewTocLevel($l, $parentLevel);

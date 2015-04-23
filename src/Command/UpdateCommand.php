@@ -1,6 +1,6 @@
 <?php
 
-namespace Birke\Mediawiki\Tocbot;
+namespace Birke\Mediawiki\Bookbot;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
