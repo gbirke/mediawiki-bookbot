@@ -1,6 +1,6 @@
 {
-    "name": "birke/mediawiki_tocbot",
-    "description": "Mediawiki bot that updates TOCs of books",
+    "name": "birke/mediawiki_bookbot",
+    "description": "Mediawiki bot generates print pages from TOCs of books",
     "require": {
         "monolog/monolog": "~1.7",
         "symfony/console": "~2.4",
@@ -11,10 +11,10 @@
     "authors": [
         {
             "name": "Gabriel Birke",
-            "email": "gabriel.birke@tib.uni-hannover.de"
+            "email": "gb@birke-software.de"
         }
     ],    
     "autoload": {
-        "psr-0": {"Birke\\": "src/"}
+        "psr-4": {"Birke\\Mediawiki\\Bookbot\\": "src/"}
     }
 }
