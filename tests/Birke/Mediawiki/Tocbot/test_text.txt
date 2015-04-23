@@ -1,0 +1,10 @@
+Lorem Ipsum
+
+== InhaltsVerzeichnis ==
+<div class="BookTOC foo">
+# [[Seite eins|Eins]]
+# [[Seite eins#UnterÜberschrift|Eins]]
+## [[Seite zwo]]
+</div>
+
+Dolor sit amet

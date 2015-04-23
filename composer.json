@@ -1,0 +1,20 @@
+{
+    "name": "birke/mediawiki_tocbot",
+    "description": "Mediawiki bot that updates TOCs of books",
+    "require": {
+        "monolog/monolog": "~1.7",
+        "symfony/console": "~2.4",
+        "symfony/monolog-bridge": "~2.4",
+        "gbirke/mediawiki-api": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Gabriel Birke",
+            "email": "gabriel.birke@tib.uni-hannover.de"
+        }
+    ],    
+    "autoload": {
+        "psr-0": {"Birke\\": "src/"}
+    }
+}
