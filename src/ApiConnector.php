@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the class TocGenerator
+ * This file contains the class ApiConnector
  * 
  * @author birkeg
  */
@@ -14,11 +14,12 @@ use Birke\Mediawiki\Api\Session;
 use \Monolog\Logger;
 
 /**
- * Wrapper around common MediaWiki API client to function
+ * Wrapper around common MediaWiki API client to do specific functions
  *
  * @author birkeg
  */
-class ApiConnector {
+class ApiConnector
+{
     
     /**
      *
@@ -38,63 +39,110 @@ class ApiConnector {
      */
     protected $logger;
     
-    function __construct(Session $session, Logger $logger) {
+    /**
+     * How many list items can be retrieved from the API with one "query" action
+     * @var int 
+     */
+    public $apiLimit = 500;
+    
+    /**
+     * Cache for the last stabble revision id for each page
+     * @var array
+     */
+    protected $stableRevIdsForTitle;
+
+
+    public function __construct(Session $session, Logger $logger)
+    {
         $this->session = $session;
         $this->client = $session->getClient();
         $this->logger = $logger;
+    }
+    
+    /**
+     * Get HTML 
+     * @param string $title
+     * @param boolean $latestStableVersion
+     * @return string
+     */
+    public function downloadPageText($title, $latestStableVersion = true)
+    {
+        $query = array (
+            'action' => 'query',
+            'prop' => 'revisions',
+            'rvprop' => 'content',
+            'format' => 'json'
+        );
+
+        // if we find a stable id , let's use it
+        $normalizedTitle = str_replace(' ', '_', $title);
+        $latestStableRevId = $latestStableVersion ? $this->getLastestStableRevId($normalizedTitle) : 0;
+        if ($latestStableRevId) {
+            $query ['revids'] = (string) $latestStableRevId;
+        } else {
+            $query ['titles'] = $title;
+        }
+
+        $data = $this->getDataFromClient($query);
+        // convert pageid => page date to array
+        $pages = array_values($data['query']['pages']);
+        // return full test (*) of first revision of first page
+        return $pages[0]['revisions'][0]['*'];
+    }
+    
+    /**
+     * 
+     * @param string $title
+     * @return int
+     */
+    protected function getLastestStableRevId($title)
+    {
+        if (!is_null($this->stableRevIdsForTitle)) {
+            $this->initializeRevisionIdCache();
+        }
+        return isset($this->stableRevIdsForTitle[$title]) ? $this->stableRevIdsForTitle[$title] : 0;
+    }
+    
+    protected function initializeRevisionIdCache()
+    {
         
-   
         // i found no better way to get the stable version of a page;
         // 'stable' => '1' does not work in api query
         $this->stableRevIdsForTitle = array();
         $query = array(
-        	'action'=>'query',
-        	'list'=>'reviewedpages|oldreviewedpages',
-        	'format'=>'json'
+            'action'=>'query',
+            'list'=>'oldreviewedpages|reviewedpages',
+            'format'=>'json',
+            'rplimit' => $this->apiLimit,
+            'orlimit' => $this->apiLimit
         );
+        
+        $data = $this->getDataFromClient($query);
+        foreach ($data['query'] as $pagelist) {
+            foreach ($pagelist as $page) {
+                $normalizedTitle = str_replace(' ', '_', $page['title']);
+                $this->stableRevIdsForTitle[$normalizedTitle] = $page['stable_revid'];
+            }
+        }
+    }
+    
+    /**
+     * Send a request to the API and get the data back as array
+     * 
+     * @param array $query
+     * @return array
+     */
+    protected function getDataFromClient($query)
+    {
         $url = $this->client->getBaseUrl();
         $req = $this->client->get($url, array(), array('query' => $query));
         $response = $req->send();
-        $data = $response->json();
-       
-        foreach ($data['query'] as $qs){
-        	foreach($qs as $q){
-        	$title = str_replace(' ', '_',$q['title']);// see $title2 below
-        	$stable_revid = $q['stable_revid'];
-        	$this->stableRevIdsForTitle[$title] = $stable_revid;
-			}
-		}
-	}
-	public function downloadPageText($title) {
-		$query = array (
-				'action' => 'query',
-				'prop' => 'revisions',
-				'rvprop' => 'content',
-				'format' => 'json' 
-		);
-		
-		
-		// if we find a stable id , let's use it
-		// ignore inconsistent usage of underscores/whitespaces
-		$title2 = str_replace ( ' ', '_', $title );
-		if (isset ( $this->stableRevIdsForTitle [$title2] )) {
-			$query ['revids'] = '' . $this->stableRevIdsForTitle [$title2];
-		} else {
-			$query ['titles'] = $title;
-		}
-		
-		$url = $this->client->getBaseUrl ();
-		$req = $this->client->get ( $url, array (), array (
-				'query' => $query 
-		) );
-		$response = $req->send ();
-		$data = $response->json ();
-		
-        $pages = array_values($data['query']['pages']);
-        return $pages[0]['revisions'][0]['*'];
+        return $response->json();
     }
     
-    public function getSectionsForTitle($title) {
+    
+    public function getSectionsForTitle($title)
+    {
         $cmd = $this->client->getCommand('parse', array(
                 'prop' => 'sections|displaytitle',
                 'page' => $title
@@ -107,7 +155,8 @@ class ApiConnector {
         return $data['parse']['sections'];
     }
     
-    public function editPage($title, $content, $summary) {
+    public function editPage($title, $content, $summary)
+    {
         $query = array(
             'action' => 'edit',
             'title' => $title,
@@ -118,11 +167,7 @@ class ApiConnector {
             'token' => $this->session->getEditToken()
         );
         
-        $url = $this->client->getBaseUrl();
-        $req = $this->client->post($url, array(), $query);
-        $response = $req->send();
-        $data = $response->json();
+        $data = $this->getDataFromClient($query);
         return $data['edit']['result'];
     }
-    
 }
