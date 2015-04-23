@@ -4,7 +4,10 @@ This MediaWiki Bot consists of several functions to
 - Fix headline indentation on print page to match the indentation in the table of contents.
 - keep the table of contents in sync with the pages it's linking to.
 
-
+# TODO
+- Implement & Test TocItemParser
+- Implement & Test PrintVersionGenerator to generate Print version text
+- Update Command to use PrintVersionGenerator
 
 
 
