@@ -45,18 +45,13 @@ class TocParser
      */
     public function parse($text)
     {
-        if (!preg_match($this->startMarkerRx, $text, $matches, PREG_OFFSET_CAPTURE)) {
+        list($startMarkerText, $startMarkerOffset) = $this->getMarkerAndOffset($text, $this->startMarkerRx);
+        list($endMarkerText, $endMarkerOffset) = $this->getMarkerAndOffset($text, $this->endMarkerRx, $startMarkerOffset);
+        if (!$startMarkerText || !$endMarkerText) {
             return null;
         }
-        $startMarker = $matches[0][0];
-        $startMarkerOffset = $matches[0][1];
-        $startMarkerLength = strlen($startMarker);
-        if (!preg_match($this->endMarkerRx, $text, $matches, PREG_OFFSET_CAPTURE, $startMarkerOffset + $startMarkerLength)) {
-            return null;
-        }
-        $endMarkerOffset = $matches[0][1];
-        $tocLength = $endMarkerOffset - $startMarkerOffset - $startMarkerLength;
-        $tocText = substr($text, $startMarkerOffset + $startMarkerLength, $tocLength);
+        $marker = new TocMarker($startMarkerText, $startMarkerOffset, $endMarkerText, $endMarkerOffset);
+        $tocText = substr($text, $marker->getTocStart(), $marker->getTocLength());
         $tocLines = explode("\n", $tocText);
         $toc = new TableOfContents();
         foreach ($tocLines as $tocLine) {
@@ -68,4 +63,12 @@ class TocParser
         return $toc;
     }
     
+    protected function getMarkerAndOffset($text, $pattern, $offset = 0)
+    {
+        if (!preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE, $offset)) {
+            return array("", 0);
+        } else {
+            return $matches[0];
+        }
+    }
 }
