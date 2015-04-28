@@ -22,19 +22,18 @@ class TocParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new TocParser($this->itemParser);
     }
     
-    public function testNoTableOfContentsIsCreatedOnEmptyText()
+    public function testNoTableOfContentsIsCreatedForInvalidInput()
     {
-        $this->assertNull($this->parser->parse(""));
+        $this->assertNull($this->parser->parse(""), "TOC was created for empty text.");
+        $this->assertNull($this->parser->parse('<div class="bookTOC">  '), "TOC was created when end marker was missing");
+        $this->assertNull($this->parser->parse('</div> <div class="bookTOC">'), "TOC was created when start and end markers had wrong order");
     }
     
-    public function testNoTableOfContentsIsCreatedIfEndMarkerIsMissing()
+    public function testTableOfContentExitsReturnsFalseForInvalidInput()
     {
-        $this->assertNull($this->parser->parse('<div class="bookTOC">  '));
-    }
-    
-    public function testNoTableOfContentsIsCreatedIfEndMarkerComesBeforeStartMarker()
-    {
-        $this->assertNull($this->parser->parse('</div> <div class="bookTOC">'));
+        $this->assertFalse($this->parser->tocExists(""), "TOC was created for empty text.");
+        $this->assertFalse($this->parser->tocExists('<div class="bookTOC">  '), "TOC was created when end marker was missing");
+        $this->assertFalse($this->parser->tocExists('</div> <div class="bookTOC">'), "TOC was created when start and end markers had wrong order");
     }
 
     public function testTableOfContentsIsCreatedWhenMarkerIsFound()

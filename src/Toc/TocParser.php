@@ -38,6 +38,13 @@ class TocParser
         $this->itemParser = $itemParser;
     }
     
+    public function tocExists($text)
+    {
+        list($startMarkerText, $startMarkerOffset) = $this->getMarkerAndOffset($text, $this->startMarkerRx);
+        list($endMarkerText, $endMarkerOffset) = $this->getMarkerAndOffset($text, $this->endMarkerRx, $startMarkerOffset);
+        return $startMarkerText && $endMarkerText;
+    }
+    
     /**
      * Create a table of contents object with items from text
      * @param string $text
@@ -70,7 +77,7 @@ class TocParser
         $marker = new TocMarker($startMarkerText, $startMarkerOffset, $endMarkerText, $endMarkerOffset);
         return substr($text, $marker->getTocStart(), $marker->getTocLength());
     }
-    
+     
     /**
      * Get lines between TOC markers as array
      * 
