@@ -36,12 +36,12 @@ class TocItem
     private $level;
     
     /**
-     * If the generated wikitext should contain a new list level (separately numbered
+     * Indent item, additionally to level
      * @var boolean
      */
     private $indentWithNumbering;
     
-    public function __construct($title, $label, $level, $indentWithNumbering = true)
+    public function __construct($title, $label, $level, $indent = 0)
     {
         if ($level < 1) {
             throw new TocException("Toc Item level must be at least 1");
@@ -49,7 +49,7 @@ class TocItem
         $this->title = $title;
         $this->label = $label;
         $this->level = $level;
-        $this->indentWithNumbering = $indentWithNumbering;
+        $this->indent = $indent;
     }
     
     public function getTitle()
@@ -69,11 +69,7 @@ class TocItem
     
     public function __toString()
     {
-        if ($this->indentWithNumbering) {
-            $indent = str_repeat("#", $this->level);
-        } else {
-            $indent = "#" . str_repeat(":", $this->level-1);
-        }
-        return sprintf("%s [[%s|%s]]", $indent, $this->title, $this->label);
+        $prefix = str_repeat("#", $this->level) . str_repeat(":", ($this->indent));
+        return sprintf("%s [[%s|%s]]", $prefix, $this->title, $this->label);
     }
 }

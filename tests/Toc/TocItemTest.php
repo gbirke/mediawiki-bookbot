@@ -40,22 +40,16 @@ class TocItemTest extends \PHPUnit_Framework_TestCase
     {
         new TocItem("Foo_Page", "Foo", 0);
     }
-
-    public function testIndentWithoutNumberingAddsCorrectIndentationOnLevel1()
-    {
-        $item = new TocItem("Foo_Page", "Foo", 1, false);
-        $this->assertEquals("# [[Foo_Page|Foo]]", (string) $item);
-    }
     
-    public function testIndentWithoutNumberingAddsCorrectIndentationOnLevel2()
+    public function testIndentOneLevelAddsCorrectPrefix()
     {
-        $item = new TocItem("Foo_Page", "Foo", 2, false);
+        $item = new TocItem("Foo_Page", "Foo", 1, 1);
         $this->assertEquals("#: [[Foo_Page|Foo]]", (string) $item);
     }
     
-    public function testIndentWithoutNumberingAddsCorrectIndentationOnLevel3()
+    public function testIndentTwoLevelsAddsCorrectPrefix()
     {
-        $item = new TocItem("Foo_Page", "Foo", 3, false);
+        $item = new TocItem("Foo_Page", "Foo", 1, 2);
         $this->assertEquals("#:: [[Foo_Page|Foo]]", (string) $item);
     }
 }
