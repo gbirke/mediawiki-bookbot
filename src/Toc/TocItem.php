@@ -56,6 +56,11 @@ class TocItem
     {
         return $this->title;
     }
+    
+    public function getTitleWithoutAnchor()
+    {
+        return preg_replace("/#.*$/", "", $this->title);
+    }
 
     public function getLabel()
     {

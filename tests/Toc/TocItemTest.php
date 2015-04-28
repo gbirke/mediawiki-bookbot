@@ -52,4 +52,10 @@ class TocItemTest extends \PHPUnit_Framework_TestCase
         $item = new TocItem("Foo_Page", "Foo", 1, 2);
         $this->assertEquals("#:: [[Foo_Page|Foo]]", (string) $item);
     }
+    
+    public function testGetTitleWithoutAnchorRemovesAnchorPartOfTitle()
+    {
+         $item = new TocItem("Foo_Page#anchor", "Foo", 1, 2);
+         $this->assertEquals("Foo_Page", $item->getTitleWithoutAnchor());
+    }
 }
