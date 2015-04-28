@@ -45,24 +45,63 @@ class TocParser
      */
     public function parse($text)
     {
-        list($startMarkerText, $startMarkerOffset) = $this->getMarkerAndOffset($text, $this->startMarkerRx);
-        list($endMarkerText, $endMarkerOffset) = $this->getMarkerAndOffset($text, $this->endMarkerRx, $startMarkerOffset);
-        if (!$startMarkerText || !$endMarkerText) {
+        $toc = new TableOfContents();
+        try {
+            $tocLines = $this->getTocLines($text);
+        } catch (TocException $ex) {
             return null;
         }
-        $marker = new TocMarker($startMarkerText, $startMarkerOffset, $endMarkerText, $endMarkerOffset);
-        $tocText = substr($text, $marker->getTocStart(), $marker->getTocLength());
-        $tocLines = explode("\n", $tocText);
-        $toc = new TableOfContents();
-        foreach ($tocLines as $tocLine) {
-            $tocItem = $this->itemParser->parse(trim($tocLine));
-            if (!is_null($tocItem)) {
-                $toc->addItem($tocItem);
-            }
+        foreach ($tocLines as $line) {
+            $this->addTocItem($toc, $line);
         }
         return $toc;
     }
+     
+    /**
+     * Get text between TOC markers
+     * 
+     * @param string $text
+     * @return string
+     */
+    protected function getTocText($text)
+    {
+        list($startMarkerText, $startMarkerOffset) = $this->getMarkerAndOffset($text, $this->startMarkerRx);
+        list($endMarkerText, $endMarkerOffset) = $this->getMarkerAndOffset($text, $this->endMarkerRx, $startMarkerOffset);
+        $marker = new TocMarker($startMarkerText, $startMarkerOffset, $endMarkerText, $endMarkerOffset);
+        return substr($text, $marker->getTocStart(), $marker->getTocLength());
+    }
     
+    /**
+     * Get lines between TOC markers as array
+     * 
+     * @param string $text
+     * @return array
+     */
+    protected function getTocLines($text)
+    {
+        return explode("\n", $this->getTocText($text));
+    }
+   
+    /**
+     * If the ItemParser detects a TocItem in the line, add it to the toc object.
+     * @param TableOfContents $toc
+     * @param string $line
+     */
+    protected function addTocItem($toc, $line)
+    {
+        $tocItem = $this->itemParser->parse(trim($line));
+        if (!is_null($tocItem)) {
+            $toc->addItem($tocItem);
+        }
+    }
+    
+    /**
+     * Get an array of start/end marker and its offset
+     * @param string $text Text to search
+     * @param string $pattern Marker search pattern
+     * @param int $offset Where to start searching
+     * @return array
+     */
     protected function getMarkerAndOffset($text, $pattern, $offset = 0)
     {
         if (!preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE, $offset)) {
