@@ -38,6 +38,11 @@ class TocParser
         $this->itemParser = $itemParser;
     }
     
+    /**
+     * Create a table of contents object with items from text
+     * @param string $text
+     * @return \Birke\Mediawiki\Bookbot\Toc\TableOfContents
+     */
     public function parse($text)
     {
         if (!preg_match($this->startMarkerRx, $text, $matches, PREG_OFFSET_CAPTURE)) {
@@ -46,16 +51,21 @@ class TocParser
         $startMarker = $matches[0][0];
         $startMarkerOffset = $matches[0][1];
         $startMarkerLength = strlen($startMarker);
-        if (!preg_match($this->endMarkerRx, $text, $matches, PREG_OFFSET_CAPTURE)) {
+        if (!preg_match($this->endMarkerRx, $text, $matches, PREG_OFFSET_CAPTURE, $startMarkerOffset + $startMarkerLength)) {
             return null;
         }
         $endMarkerOffset = $matches[0][1];
         $tocLength = $endMarkerOffset - $startMarkerOffset - $startMarkerLength;
-        $toc = substr($text, $startMarkerOffset + $startMarkerLength, $tocLength);
-        $tocLines = explode("\n", $toc);
+        $tocText = substr($text, $startMarkerOffset + $startMarkerLength, $tocLength);
+        $tocLines = explode("\n", $tocText);
+        $toc = new TableOfContents();
         foreach ($tocLines as $tocLine) {
-            $this->itemParser->parse(trim($tocLine));
+            $tocItem = $this->itemParser->parse(trim($tocLine));
+            if (!is_null($tocItem)) {
+                $toc->addItem($tocItem);
+            }
         }
-        return new TableOfContents();
+        return $toc;
     }
+    
 }

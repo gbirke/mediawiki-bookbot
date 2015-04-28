@@ -32,6 +32,11 @@ class TocParserTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->parser->parse('<div class="bookTOC">  '));
     }
     
+    public function testNoTableOfContentsIsCreatedIfEndMarkerComesBeforeStartMarker()
+    {
+        $this->assertNull($this->parser->parse('</div> <div class="bookTOC">'));
+    }
+
     public function testTableOfContentsIsCreatedWhenMarkerIsFound()
     {
         $this->assertInstanceOf(
@@ -53,5 +58,16 @@ class TocParserTest extends \PHPUnit_Framework_TestCase
                 ->method('parse')
                 ->withConsecutive(array("Foo"), array("Bar x"), array(""));
         $this->parser->parse("<div class=\"bookTOC\">Foo \nBar x\n    </div>");
+    }
+
+    public function testItemsAreStored()
+    {
+        $item = $this->getMockBuilder('Birke\Mediawiki\Bookbot\Toc\TocItem')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->itemParser->method('parse')
+                ->willReturn($item);
+        $toc = $this->parser->parse("<div class=\"bookTOC\">abcd</div>");
+        $this->assertEquals(array($item), $toc->getItems());
     }
 }
