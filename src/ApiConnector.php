@@ -86,8 +86,12 @@ class ApiConnector
         $data = $this->getDataFromClient($query);
         // convert pageid => page date to array
         $pages = array_values($data['query']['pages']);
-        // return full test (*) of first revision of first page
-        return $pages[0]['revisions'][0]['*'];
+        // return full text (*) of first revision of first page
+        if (!empty($pages[0]['revisions'][0]['*'])) {
+            return $pages[0]['revisions'][0]['*'];
+        } else {
+            return "";
+        }
     }
     
     /**
@@ -166,8 +170,48 @@ class ApiConnector
             'format' => 'json',
             'token' => $this->session->getEditToken()
         );
-        
-        $data = $this->getDataFromClient($query);
+        $url = $this->client->getBaseUrl();
+        $req = $this->client->post($url, array(), $query);
+        $response = $req->send();
+        $data = $response->json();
         return $data['edit']['result'];
+    }
+    
+    /**
+     * Call Wiki API to get array of all titles in a category
+     * 
+     * @param string $categoryName Category name without "Category:" prefix
+     * @param int $continue Contine API query at offset
+     * @return array 
+     */
+    public function getAllPageTitlesInCategory($categoryName, $continue = null)
+    {
+        $query = array(
+            'action' => 'query',
+            'list' => 'categorymembers',
+            'cmtitle' => 'Category:'.$categoryName,
+            'cmtype' => 'page',
+            'format' => 'json',
+        );
+        if ($continue) {
+            $query['cmcontinue'] = $continue;
+        }
+        
+        $url = $this->client->getBaseUrl();
+        $req = $this->client->get($url, array(), array('query' => $query));
+        $response = $req->send();
+        $data = $response->json();
+        
+        $titles = array();
+        foreach ($data['query']['categorymembers'] as $page) {
+            $titles[] = $page['title'];
+        }
+        if (!empty($data['query-continue']['categorymembers'])) {
+            $titles = array_merge($titles, $this->getAllPageTitlesInCategory(
+                $categoryName,
+                $data['query-continue']['categorymembers']['cmcontinue']
+            ));
+        }
+        return $titles;
     }
 }
