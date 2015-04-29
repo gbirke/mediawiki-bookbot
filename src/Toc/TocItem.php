@@ -11,6 +11,9 @@ namespace Birke\Mediawiki\Bookbot\Toc;
 /**
  * A TocItem represents a single entry (link) in a table of contents.
  *
+ * A TocItem can have a level which decides the numbering level in the hierarchy of entries.
+ * A TocItem can also have an indentation which is a visual indent without changing the numbering level.
+ *
  * @author birkeg
  */
 class TocItem
@@ -39,7 +42,7 @@ class TocItem
      * Indent item, additionally to level
      * @var boolean
      */
-    private $indentWithNumbering;
+    private $indent;
     
     public function __construct($title, $label, $level, $indent = 0)
     {
@@ -72,6 +75,16 @@ class TocItem
         return $this->level;
     }
     
+    public function getIndent()
+    {
+        return $this->indent;
+    }
+
+    public function getAbsoluteLevel()
+    {
+        return $this->level + $this->indent;
+    }
+
     public function __toString()
     {
         $prefix = str_repeat("#", $this->level) . str_repeat(":", ($this->indent));
