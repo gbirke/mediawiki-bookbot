@@ -15,32 +15,32 @@ namespace Birke\Mediawiki\Bookbot\Toc;
  */
 class TableOfContents
 {
-    /**
-     * Start marker
-     * @var string
-     */
-    public $startMarker = '<div class="BookTOC">';
-    
-    /**
-     * End marker
-     * @var string
-     */
-    public $endMarker = '</div>';
-    
     private $items;
     
     public function __construct($items = array())
     {
-        $this->items = $items;
+        $this->items = array_reduce($items, function ($collection, $item) {
+            $collection[$item->getTitle()] = $item;
+            return $collection;
+        }, array());
     }
 
     public function getItems()
     {
-        return $this->items;
+        return array_values($this->items);
     }
 
     public function addItem(TocItem $item)
     {
-        $this->items[] = $item;
+        $this->items[$item->getTitle()] = $item;
+    }
+    
+    public function getItemById($itemId)
+    {
+        if (isset($this->items[$itemId])) {
+            return $this->items[$itemId];
+        } else {
+            return null;
+        }
     }
 }
