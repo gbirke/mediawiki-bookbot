@@ -33,10 +33,20 @@ class PageTitleGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("= Foo =", $generator->generatePageTitle($item, "Book"));
     }
     
+    public function testPageTitleHandlesUnderscoresInPageTitleAndBookName()
+    {
+        $generator = new PageTitleGenerator();
+        $item = new Toc\TocItem("Book_Name/Foo", "Link to foo", 1);
+        $this->assertEquals("= Foo =", $generator->generatePageTitle($item, "Book Name"));
+        $item = new Toc\TocItem("Book Name/Foo", "Link to foo", 1);
+        $this->assertEquals("= Foo =", $generator->generatePageTitle($item, "Book_Name"));
+    }
+
+    
     public function testHeadingLevelCannotExceedSix()
     {
         $generator = new PageTitleGenerator();
         $item = new Toc\TocItem("Foo", "Link to foo", 3, 4);
         $this->assertEquals("====== Foo ======", $generator->generatePageTitle($item));
-    }
+    }    
 }

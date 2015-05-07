@@ -77,7 +77,7 @@ class PrintVersionGenerator
         $textCollector = new PageTextCollector($this->conn);
         $pageTexts = $textCollector->getPages($toc);
         foreach ($pageTexts as $pageId => $text) {
-            $chapterTitle = $titleGenerator->generatePageTitle($toc->getItemById($pageId, $bookTitle));
+            $chapterTitle = $titleGenerator->generatePageTitle($toc->getItemById($pageId), $bookTitle);
             $printText .= sprintf("\n\n%s\n\n", $chapterTitle);
             $printText .= $text;
         }

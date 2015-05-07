@@ -25,12 +25,9 @@ class PageTitleGenerator
     
     protected function removeBookTitleFromPageName($pageName, $bookTitle)
     {
-        $bookTitlePath = "$bookTitle/";
-        $pagenameStartsWithBookTitle = strpos($pageName, $bookTitlePath) === 0;
-        if ($pagenameStartsWithBookTitle) {
-            return preg_replace("/^".preg_quote($bookTitlePath, "/")."/", "", $pageName);
-        } else {
-            return $pageName;
-        }
+        $quotedBookTitle = preg_quote($bookTitle, "/");
+        $bookTitlePath = preg_replace("/[_ ]/", "[_ ]", $quotedBookTitle)."\\/";
+        return preg_replace("/^".$bookTitlePath."/", "", $pageName);
+        
     }
 }
