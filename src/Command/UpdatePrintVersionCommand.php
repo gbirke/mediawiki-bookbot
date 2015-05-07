@@ -14,6 +14,7 @@ use Birke\Mediawiki\Api\MediawikiApiClient;
 use Birke\Mediawiki\Api\Session;
 use Birke\Mediawiki\Bookbot\ApiConnector;
 use Birke\Mediawiki\Bookbot\PrintVersionGenerator;
+use Birke\Mediawiki\Bookbot\BookMetadata;
 
 /**
  * Create a print version of a book
@@ -62,6 +63,13 @@ class UpdatePrintVersionCommand extends Command
                 'Include text for print version ',
                 'none'
             )
+            ->addOption(
+                "print_title",
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Title of print page. If this is a subpage, it will be created as-is.',
+                '_Print_Version'
+            )
                 
         ;
     }
@@ -78,9 +86,16 @@ class UpdatePrintVersionCommand extends Command
         $generator = new PrintVersionGenerator($connector, $logger);
         $preamble = $input->getOption('preamble');
         $bookPages = $this->getPageTitles($input->getArgument('page'), $connector);
+        $printTitle = $input->getOption('print_title');
+        
+        if (count($bookPages) > 1 && strpos($printTitle, "/")) {
+            $output->writeln("When specifying a subpage as print page title you can only export one book at a time.");
+            exit(2);
+        }
         
         foreach ($bookPages as $page) {
-            $generator->generatePrintpageForTitle($page, $preamble);
+            $metadata = new BookMetadata($page, $printTitle);
+            $generator->generatePrintpageForTitle($metadata, $preamble);
         }
         
         $session->logout();

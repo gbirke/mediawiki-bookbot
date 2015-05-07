@@ -35,12 +35,13 @@ class PrintVersionGenerator
         $this->logger = $logger;
     }
     
-    public function generatePrintpageForTitle($title, $preamble = "none", $printpageName = "_Druckversion")
+    public function generatePrintpageForTitle(BookMetadata $metadata, $preamble = "none")
     {
-        $printTitle = $title.'/'.$printpageName;
+        $printTitle = $metadata->getPrintPageTitle();
+        $title = $metadata->getBookTitle();
                 
         // Download page text
-        $text = $this->conn->downloadPageText($title);
+        $text = $this->conn->downloadPageText($metadata->getTocPageTitle());
         $tocParser = new Toc\TocParser(new Toc\TocItemParser());
         if (!$tocParser->tocExists($text)) {
             $this->logger->notice("Page '$title' has no TOC.");
@@ -76,7 +77,8 @@ class PrintVersionGenerator
         $textCollector = new PageTextCollector($this->conn);
         $pageTexts = $textCollector->getPages($toc);
         foreach ($pageTexts as $pageId => $text) {
-            $printText .= sprintf("\n\n%s\n\n", $titleGenerator->generatePageTitle($toc->getItemById($pageId, $bookTitle)));
+            $chapterTitle = $titleGenerator->generatePageTitle($toc->getItemById($pageId, $bookTitle));
+            $printText .= sprintf("\n\n%s\n\n", $chapterTitle);
             $printText .= $text;
         }
         
