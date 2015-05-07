@@ -26,6 +26,11 @@ class PageTextCollector
         $this->conn = $conn;
     }
 
+    /**
+     * 
+     * @param \Birke\Mediawiki\Bookbot\Toc\TableOfContents $toc
+     * @return array
+     */
     public function getPages(Toc\TableOfContents $toc)
     {
         $pages = array();
